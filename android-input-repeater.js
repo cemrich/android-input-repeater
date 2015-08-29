@@ -3,10 +3,10 @@
 var pjson = require('./package.json');
 var child_process = require('child_process');
 var ArgumentParser = require('argparse').ArgumentParser;
+var IntputEventCapturer = require('./IntputEventCapturer');
 
 var NEWLINE_REGEXP = /[\r|\n]+/;
 var DEVICE_ID_REGEXP = /^[a-zA-Z0-9]{5,}/;
-var EVENT_STRING_REGEXP = /^\/dev\/input\/event(\d): (\d{4}) (\d{4}) (\d{8})$/mg;
 var ADB_PATH = 'adb';
 
 var args = new ArgumentParser({
@@ -32,26 +32,17 @@ if (devices.length < 2) {
 function mirrorInputEvents(sourceDeviceId, targetShellProcesses) {
   var lastSentEvent;
   var count = 0;
-  getInputEvents(sourceDeviceId, function (event) {
+  var inputCapturer = new IntputEventCapturer(sourceDeviceId);
+  inputCapturer.onInputEvent = function (event) {
     console.log(count++, sourceDeviceId, event);
-    if (isEqual(event, lastSentEvent)) return;
+    if (event.equals(lastSentEvent)) return;
     lastSentEvent = event;
     Object.keys(targetShellProcesses).forEach(function (targetDeviceId) {
       if (targetDeviceId !== sourceDeviceId) {
         sendEvent(targetShellProcesses[targetDeviceId], event);
       }
     });
-  }, function (error) {
-      console.error(error);
-  });
-}
-
-function isEqual(event1, event2) {
-  return event1 && event2 &&
-    event1.type === event2.type &&
-    event1.params[0] === event2.params[0] &&
-    event1.params[1] === event2.params[1] &&
-    event1.params[2] === event2.params[2];
+  };
 }
 
 function getShellProcesses(deviceIds) {
@@ -72,37 +63,6 @@ function getShellProcess(deviceId) {
 function sendEvent(shellProcess, event) {
   var command = "sendevent /dev/input/event" + event.type + " " + event.params.join(" ") + '\n';
   shellProcess.stdin.write(command);
-}
-
-function getInputEvents(deviceId, onEvent, onError) {
-  var command = ADB_PATH + ' -s ' + deviceId + ' shell getevent';
-  var child = spawn(command);
-  child.stdout.on('data', function (data) {
-    var eventStr = data.toString();
-    parseEventString(eventStr, onEvent);
-  });
-  child.stdout.on('error', function (error) {
-    onError(error);
-  });
-  child.stdout.on('end', function (error) {
-    onError(error);
-  });
-  child.stdout.on('close', function (error) {
-    onError(error);
-  });
-  child.stderr.on('data', function (data) {
-    onError(data.toString());
-  });
-}
-
-function parseEventString(eventStr, onEvent) {
-  var match;
-  var eventObj = {};
-  while (match = EVENT_STRING_REGEXP.exec(eventStr)) {
-    eventObj.type = match[1];
-    eventObj.params = match.slice(2, 5).map(function (hex) { return parseInt(hex, 16) });
-    onEvent(eventObj);
-  }
 }
 
 function spawn(command) {
