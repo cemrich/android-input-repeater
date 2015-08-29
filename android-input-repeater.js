@@ -3,6 +3,7 @@
 var pjson = require('./package.json');
 var ArgumentParser = require('argparse').ArgumentParser;
 var IntputEventCapturer = require('./IntputEventCapturer');
+var InputEventSender = require('./InputEventSender');
 var DeviceDetector = require('./DeviceDetector');
 var adbBridge = require('./adbBridge');
 
@@ -20,37 +21,35 @@ console.log("Devices detected:", devices);
 if (devices.length < 2) {
   console.error("There has to be more than one connected android device.");
 } else {
-  var shellProcesses = getShellProcesses(devices);
+  var senderMap = getSenderMap(devices);
   devices.forEach(function (deviceId) {
-    mirrorInputEvents(deviceId, shellProcesses);
+    mirrorInputEvents(deviceId, senderMap);
   });
 }
 
-function mirrorInputEvents(sourceDeviceId, targetShellProcesses) {
+function mirrorInputEvents(sourceDeviceId, targetMap) {
   var lastSentEvent;
-  var count = 0;
   var inputCapturer = new IntputEventCapturer(sourceDeviceId);
+  var targetDevices = Object.keys(targetMap).filter(function (targetDeviceId) {
+    return targetDeviceId !== sourceDeviceId;
+  });
+
   inputCapturer.onInputEvent = function (event) {
-    console.log(count++, sourceDeviceId, event);
     if (event.equals(lastSentEvent)) return;
+
+    console.log(sourceDeviceId, event);
     lastSentEvent = event;
-    Object.keys(targetShellProcesses).forEach(function (targetDeviceId) {
-      if (targetDeviceId !== sourceDeviceId) {
-        sendEvent(targetShellProcesses[targetDeviceId], event);
-      }
+
+    targetDevices.forEach(function (targetDeviceId) {
+      senderMap[targetDeviceId].send(event);
     });
   };
 }
 
-function getShellProcesses(deviceIds) {
-  var processes = {};
+function getSenderMap(deviceIds) {
+  var senderMap = {};
   deviceIds.forEach(function (deviceId) {
-    processes[deviceId] = adbBridge.execAsync('shell', deviceId);
+    senderMap[deviceId] = new InputEventSender(deviceId);
   });
-  return processes;
-}
-
-function sendEvent(shellProcess, event) {
-  var command = "sendevent /dev/input/event" + event.type + " " + event.params.join(" ") + '\n';
-  shellProcess.stdin.write(command);
+  return senderMap;
 }
