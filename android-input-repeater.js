@@ -2,10 +2,10 @@
 
 var pjson = require('./package.json');
 var ArgumentParser = require('argparse').ArgumentParser;
-var InputEventCapturer = require('./InputEventCapturer');
-var InputEventSender = require('./InputEventSender');
-var DeviceDetector = require('./DeviceDetector');
-var adbBridge = require('./adbBridge');
+var InputEventCapturer = require('./modules/InputEventCapturer');
+var InputEventSender = require('./modules/InputEventSender');
+var DeviceDetector = require('./modules/DeviceDetector');
+var adbBridge = require('./modules/adbBridge');
 
 var args = new ArgumentParser({
   version: pjson.version,
