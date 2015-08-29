@@ -2,8 +2,7 @@
 
 var adbBridge = require('./adbBridge');
 
-var DEVICE_ID_REGEXP = /^[a-zA-Z0-9]{5,}/;
-var NEWLINE_REGEXP = /[\r|\n]+/;
+var DEVICE_ID_REGEXP = /^[a-zA-Z0-9]{5,}/mg;
 
 var DeviceDetector = function () {
   this.devices = getDeviceIds();
@@ -14,28 +13,15 @@ var DeviceDetector = function () {
  *  empty when no device is connected
  */
 function getDeviceIds() {
-  // get devices list from adb
+  var deviceIds = [];
   var devices = adbBridge.execSync('devices');
-  devices = devices.split(NEWLINE_REGEXP);
 
-  // delete all metadata
-  devices = devices.filter(function (line, index) {
-    if (index === 0 || line === "") {
-      return false;
-    }
+  var match;
+  while ((match = DEVICE_ID_REGEXP.exec(devices))) {
+    deviceIds.push(match[0]);
+  }
 
-    if (line.match(DEVICE_ID_REGEXP) === null) {
-      console.error(line.split(/\s+/)[0] + ' is no valid device id');
-      return false;
-    } else {
-      return true;
-    }
-  });
-
-  // we only need device ids
-  return devices.map(function (line) {
-    return line.match(DEVICE_ID_REGEXP)[0];
-  });
+  return deviceIds;
 }
 
 module.exports = DeviceDetector;
