@@ -21,32 +21,22 @@ console.log("Devices detected:", devices);
 if (devices.length < 2) {
   console.error("There has to be more than one connected android device.");
 } else {
-  var senderMap = getSenderMap(devices);
+  var targetSenderMap = getTargetSenderMap(devices);
   devices.forEach(function (deviceId) {
-    mirrorInputEvents(deviceId, senderMap);
+    mirrorInputEvents(deviceId, targetSenderMap);
   });
 }
 
-function mirrorInputEvents(sourceDeviceId, targetMap) {
-  var lastSentEvent;
+function mirrorInputEvents(sourceDeviceId, targetSenderMap) {
   var inputCapturer = new InputEventCapturer(sourceDeviceId);
-  var targetDevices = Object.keys(targetMap).filter(function (targetDeviceId) {
-    return targetDeviceId !== sourceDeviceId;
+
+  Object.keys(targetSenderMap).forEach(function (targetDeviceId) {
+    if (targetDeviceId === sourceDeviceId) return;
+    inputCapturer.pipe(targetSenderMap[targetDeviceId]);
   });
-
-  inputCapturer.onInputEvent = function (event) {
-    if (event.equals(lastSentEvent)) return;
-
-    console.log(sourceDeviceId, event);
-    lastSentEvent = event;
-
-    targetDevices.forEach(function (targetDeviceId) {
-      senderMap[targetDeviceId].send(event);
-    });
-  };
 }
 
-function getSenderMap(deviceIds) {
+function getTargetSenderMap(deviceIds) {
   var senderMap = {};
   deviceIds.forEach(function (deviceId) {
     senderMap[deviceId] = new InputEventSender(deviceId);

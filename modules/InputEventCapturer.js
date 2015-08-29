@@ -42,6 +42,18 @@ InputEventCapturer.prototype.parseEventString = function (eventStr) {
   }
 };
 
+InputEventCapturer.prototype.pipe = function (inputEventSender) {
+  var lastSentEvent;
+
+  this.onInputEvent = function (event) {
+    if (lastSentEvent && lastSentEvent.equals(event)) return;
+    lastSentEvent = event;
+
+    console.log(this.deviceId, '\t>', event);
+    inputEventSender.send(event);
+  };
+};
+
 InputEventCapturer.prototype.onError = function (error) {
   console.error('IntputEventCapturer error', error, this.deviceId);
 };

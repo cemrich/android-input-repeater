@@ -9,9 +9,9 @@ var InputEventSender = function (deviceId) {
 };
 
 InputEventSender.prototype.send = function (event) {
-    var command = "sendevent /dev/input/event" + event.type + " " + event.params.join(" ") + '\n';
+    var command = 'sendevent /dev/input/event' + event.type + ' ' + event.params.join(' ') + '\n';
 
-    // console.log("sending to", this.deviceId, event);
+    console.log(this.deviceId, '\t<', event);
     this.shellProcess.stdin.write(command);
 };
 
