@@ -4,7 +4,9 @@ var pjson = require('./package.json');
 var child_process = require('child_process');
 var ArgumentParser = require('argparse').ArgumentParser;
 
+var NEWLINE_REGEXP = /[\r|\n]+/;
 var DEVICE_ID_REGEXP = /^[a-zA-Z0-9]{5,}/;
+var EVENT_STRING_REGEXP = /^\/dev\/input\/event(\d): (\d{4}) (\d{4}) (\d{8})$/mg;
 var ADB_PATH = 'adb';
 
 var args = new ArgumentParser({
@@ -21,7 +23,28 @@ console.log("Devices detected:", devices);
 if (devices.length < 2) {
   console.error("There has to be more than one connected android device.");
 } else {
-  // TODO: continue here
+  getInputEvents(devices[0], function (event) {
+      console.log(event);
+  });
+}
+
+function getInputEvents(deviceId, onEvent) {
+  var command = ADB_PATH + ' -s ' + deviceId + ' shell getevent';
+  var child = child_process.exec(command);
+  child.stdout.on('data', function (data) {
+    var eventStr = data.toString();
+    parseEventString(eventStr, onEvent);
+  });
+}
+
+function parseEventString(eventStr, onEvent) {
+  var match;
+  var eventObj = {};
+  while (match = EVENT_STRING_REGEXP.exec(eventStr)) {
+    eventObj.type = match[1];
+    eventObj.params = match.slice(2, 5).map(function (hex) { return parseInt(hex, 16) });
+    onEvent(eventObj);
+  }
 }
 
 /**
@@ -31,7 +54,7 @@ if (devices.length < 2) {
 function getDeviceIds() {
   // get devices list from adb
   var devices = child_process.execSync(ADB_PATH + ' devices').toString();
-  devices = devices.split(/[\r|\n]+/);
+  devices = devices.split(NEWLINE_REGEXP);
 
   // delete all metadata
   devices = devices.filter(function (line, index) {
