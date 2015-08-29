@@ -1,0 +1,24 @@
+{
+  "name": "android-input-repeater",
+  "version": "1.0.0",
+  "description": "Mirrors input events of all connected android devices to the other connected ones.",
+  "main": "android-input-repeater.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cemrich/android-input-repeater.git"
+  },
+  "keywords": [
+    "android",
+    "automation",
+    "input"
+  ],
+  "author": "Christine Coenen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cemrich/android-input-repeater/issues"
+  },
+  "homepage": "https://github.com/cemrich/android-input-repeater#readme"
+}
