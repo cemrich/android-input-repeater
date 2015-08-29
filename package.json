@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/cemrich/android-input-repeater/issues"
   },
-  "homepage": "https://github.com/cemrich/android-input-repeater#readme"
+  "homepage": "https://github.com/cemrich/android-input-repeater#readme",
+  "dependencies": {
+    "argparse": "^1.0.2"
+  }
 }
