@@ -2,7 +2,7 @@
 
 var pjson = require('./package.json');
 var ArgumentParser = require('argparse').ArgumentParser;
-var IntputEventCapturer = require('./IntputEventCapturer');
+var InputEventCapturer = require('./InputEventCapturer');
 var InputEventSender = require('./InputEventSender');
 var DeviceDetector = require('./DeviceDetector');
 var adbBridge = require('./adbBridge');
@@ -29,7 +29,7 @@ if (devices.length < 2) {
 
 function mirrorInputEvents(sourceDeviceId, targetMap) {
   var lastSentEvent;
-  var inputCapturer = new IntputEventCapturer(sourceDeviceId);
+  var inputCapturer = new InputEventCapturer(sourceDeviceId);
   var targetDevices = Object.keys(targetMap).filter(function (targetDeviceId) {
     return targetDeviceId !== sourceDeviceId;
   });
