@@ -9,9 +9,18 @@ var FileInputEventReader = function (filePath) {
 };
 
 FileInputEventReader.prototype.start = function () {
+  var startTime = null;
   lineReader.eachLine(this.filePath, function(line, last) {
     var event = InputEvent.deserialize(line);
-    this.onInputEvent(event);
+
+    // save timestamp af first event
+    if (startTime === null) startTime = event.time;
+
+    // delay events
+    var delay = event.time - startTime;
+    setTimeout(function () {
+      this.onInputEvent(event);
+    }.bind(this), delay);
   }.bind(this));
 };
 

@@ -1,6 +1,7 @@
 "use strict";
 
-var InputEvent = function (type, params) {
+var InputEvent = function (time, type, params) {
+  this.time = time;
   this.type = type;
   this.params = params;
 };
@@ -14,12 +15,12 @@ InputEvent.prototype.equals = function (other) {
 };
 
 InputEvent.prototype.serialize = function () {
-  return [this.type].concat(this.params).join(',');
+  return [this.time, this.type].concat(this.params).join(',');
 };
 
 InputEvent.deserialize = function (serialized) {
   var elements = serialized.split(',');
-  return new InputEvent(elements[0], elements.slice(1, 4));
+  return new InputEvent(elements[0], elements[1], elements.slice(2, 5));
 };
 
 module.exports = InputEvent;

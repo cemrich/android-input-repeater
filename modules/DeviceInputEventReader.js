@@ -37,7 +37,7 @@ DeviceInputEventReader.prototype.parseEventString = function (eventStr) {
 
   var match;
   while ((match = EVENT_STRING_REGEXP.exec(eventStr))) {
-    var inputEvent = new InputEvent(match[1], match.slice(2, 5).map(hexToDez));
+    var inputEvent = new InputEvent(Date.now(), match[1], match.slice(2, 5).map(hexToDez));
     this.onInputEvent(inputEvent);
   }
 };
