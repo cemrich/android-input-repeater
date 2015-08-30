@@ -21,6 +21,13 @@ var subpParsers = argsParser.addSubparsers({
   dest: 'subcommand'
 });
 
+var watchParser = subpParsers.addParser(
+  'watch', {
+  title: 'watch',
+  addHelp: true,
+  description: 'Outputs all input events of the only connected android device.'
+});
+
 var mirrorParser = subpParsers.addParser(
   'mirror', {
   title: 'mirror',
@@ -62,6 +69,9 @@ replayParser.addArgument(
 
 var params = argsParser.parseArgs();
 switch (params.subcommand) {
+  case 'watch':
+    watch();
+    break;
   case 'mirror':
     mirror();
     break;
@@ -73,6 +83,18 @@ switch (params.subcommand) {
     break;
   default:
     break;
+}
+
+function watch() {
+  console.log('watch');
+
+  var devices = new DeviceDetector().devices;
+  if (devices.length !== 1) {
+    console.error("There has to be exactly one connected android device.");
+    return;
+  }
+
+  var deviceReader = new DeviceInputEventReader(devices[0]);
 }
 
 function record(filePath) {
