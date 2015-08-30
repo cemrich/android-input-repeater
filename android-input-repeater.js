@@ -7,24 +7,94 @@ var InputEventSender = require('./modules/InputEventSender');
 var DeviceDetector = require('./modules/DeviceDetector');
 var adbBridge = require('./modules/adbBridge');
 
-var args = new ArgumentParser({
+var argsParser = new ArgumentParser({
   version: pjson.version,
   addHelp: true,
   description: pjson.description,
-  epilog: 'Example usage: node android-input-repeater.js"'
+  epilog: 'Example usage: "node android-input-repeater.js record -f myRecord.txt"'
 });
 
-var params = args.parseArgs();
-var devices = new DeviceDetector().devices;
-console.log("Devices detected:", devices);
+var subpParsers = argsParser.addSubparsers({
+  title: 'subcommands',
+  dest: 'subcommand'
+});
 
-if (devices.length < 2) {
-  console.error("There has to be more than one connected android device.");
-} else {
-  var targetSenderMap = getTargetSenderMap(devices);
-  devices.forEach(function (deviceId) {
-    mirrorInputEvents(deviceId, targetSenderMap);
-  });
+var mirrorParser = subpParsers.addParser(
+  'mirror', {
+  title: 'mirror',
+  addHelp: true,
+  description: 'Mirrors input events of all connected android devices to the other connected ones. ' +
+    'Please make sure to have at least two devices connected. In order to mirror all events correctly ' +
+    'all connected devices need to be of the same type and need to have the same drivers installed, ' +
+    'otherwise weird things could happen.'
+});
+
+var recordParser = subpParsers.addParser(
+  'record', {
+  title: 'record',
+  addHelp: true,
+  description: 'Records all input events of a connected android device into the given file. ' +
+    'This can be used later on to playback these input events on the same device or another ' +
+    'one of the same type and with the same drivers.'
+});
+recordParser.addArgument(
+  [ 'outfile' ], {
+    help: 'Path of the file where the input events should be saved.'
+  }
+);
+
+var replayParser = subpParsers.addParser(
+  'replay', {
+  title: 'replay',
+  addHelp: true,
+  description: 'Replays the input events saved inside the given file on all connected ' +
+    'devices. In order to mirror all events correctly all connected devices need to be ' +
+    'of the same type as the one that captured the events in the first place and need ' +
+    'to have the same drivers installed, otherwise weird things could happen.'
+});
+replayParser.addArgument(
+  [ 'infile' ], {
+    help: 'Path of the file where the input events have been saved.'
+  }
+);
+
+var params = argsParser.parseArgs();
+switch (params.subcommand) {
+  case 'mirror':
+    mirror();
+    break;
+  case 'record':
+    record(params.outfile);
+    break;
+  case 'replay':
+    replay(params.infile);
+    break;
+  default:
+    break;
+}
+
+function record(filePath) {
+  console.log('record', filePath);
+    var devices = new DeviceDetector().devices;
+}
+
+function replay(filePath) {
+  console.log('replay', filePath);
+  var devices = new DeviceDetector().devices;
+}
+
+function mirror() {
+  console.log('mirror input events');
+  var devices = new DeviceDetector().devices;
+
+  if (devices.length < 2) {
+    console.error("There has to be more than one connected android device.");
+  } else {
+    var targetSenderMap = getTargetSenderMap(devices);
+    devices.forEach(function (deviceId) {
+      mirrorInputEvents(deviceId, targetSenderMap);
+    });
+  }
 }
 
 function mirrorInputEvents(sourceDeviceId, targetSenderMap) {

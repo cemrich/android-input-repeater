@@ -6,6 +6,7 @@ var DEVICE_ID_REGEXP = /^[a-zA-Z0-9]{5,}/mg;
 
 var DeviceDetector = function () {
   this.devices = getDeviceIds();
+  console.log("Devices detected:", this.devices);
 };
 
 /**
