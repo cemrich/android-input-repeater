@@ -1,5 +1,5 @@
 # Android Input Repeater
-Mirrors input events of all connected android devices to the other connected ones.
+Utitlity for capturing and mirroring low level input events for android devices of the same type.
 
 ## Warning:
 This is a research project using the adb commands ```adb shell getevent``` and ```adb shell sendevent```. There are serious timing issues using this commands so this tool will probably **not work correctly**.
