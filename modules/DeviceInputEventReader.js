@@ -3,7 +3,7 @@
 var InputEvent = require('./InputEvent');
 var adbBridge = require('./adbBridge');
 
-var EVENT_STRING_REGEXP = /^\/dev\/input\/event(\d): (\d{4}) (\d{4}) (\d{8})$/mg;
+var EVENT_STRING_REGEXP = /^\/dev\/input\/event(\d): ([a-f\d]{4}) ([a-f\d]{4}) ([a-f\d]{8})$/mg;
 
 var DeviceInputEventReader = function (deviceId) {
   var capturer = this;
