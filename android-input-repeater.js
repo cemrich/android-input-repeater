@@ -4,6 +4,7 @@ var pjson = require('./package.json');
 var ArgumentParser = require('argparse').ArgumentParser;
 var DeviceInputEventReader = require('./modules/DeviceInputEventReader');
 var DeviceInputEventWriter = require('./modules/DeviceInputEventWriter');
+var FileInputEventReader = require('./modules/FileInputEventReader');
 var FileInputEventWriter = require('./modules/FileInputEventWriter');
 var DeviceDetector = require('./modules/DeviceDetector');
 var adbBridge = require('./modules/adbBridge');
@@ -90,7 +91,16 @@ function record(filePath) {
 
 function replay(filePath) {
   console.log('replay', filePath);
+
   var devices = new DeviceDetector().devices;
+  if (devices.length !== 1) {
+    console.error("There has to be exactly one connected android device.");
+    return;
+  }
+
+  var fileReader = new FileInputEventReader(filePath);
+  var deviceWriter = new DeviceInputEventWriter(devices[0]);
+  fileReader.pipe(deviceWriter);
 }
 
 function mirror() {

@@ -17,4 +17,9 @@ InputEvent.prototype.serialize = function () {
   return [this.type].concat(this.params).join(',');
 };
 
+InputEvent.deserialize = function (serialized) {
+  var elements = serialized.split(',');
+  return new InputEvent(elements[0], elements.slice(1, 4));
+};
+
 module.exports = InputEvent;

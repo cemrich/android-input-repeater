@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/cemrich/android-input-repeater#readme",
   "dependencies": {
-    "argparse": "^1.0.2"
+    "argparse": "^1.0.2",
+    "line-reader": "^0.2.4"
   }
 }
