@@ -99,8 +99,10 @@ function replay(filePath) {
   }
 
   var fileReader = new FileInputEventReader(filePath);
-  var deviceWriter = new DeviceInputEventWriter(devices[0]);
-  fileReader.pipe(deviceWriter);
+  var deviceWriter = new DeviceInputEventWriter(devices[0]).ready(function (p) {
+    fileReader.pipe(deviceWriter);
+    fileReader.start();
+  });
 }
 
 function mirror() {

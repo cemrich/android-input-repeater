@@ -6,8 +6,10 @@ var InputEvent = require('./InputEvent');
 
 var FileInputEventReader = function (filePath) {
   this.filePath = filePath;
+};
 
-  lineReader.eachLine(filePath, function(line, last) {
+FileInputEventReader.prototype.start = function () {
+  lineReader.eachLine(this.filePath, function(line, last) {
     var event = InputEvent.deserialize(line);
     this.onInputEvent(event);
   }.bind(this));
