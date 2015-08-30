@@ -2,9 +2,9 @@
 
 var pjson = require('./package.json');
 var ArgumentParser = require('argparse').ArgumentParser;
-var InputEventCapturer = require('./modules/InputEventCapturer');
-var InputEventDeviceSender = require('./modules/InputEventDeviceSender');
-var InputEventFileSender = require('./modules/InputEventFileSender');
+var DeviceInputEventReader = require('./modules/DeviceInputEventReader');
+var DeviceInputEventWriter = require('./modules/DeviceInputEventWriter');
+var FileInputEventWriter = require('./modules/FileInputEventWriter');
 var DeviceDetector = require('./modules/DeviceDetector');
 var adbBridge = require('./modules/adbBridge');
 
@@ -83,9 +83,9 @@ function record(filePath) {
     return;
   }
 
-  var inputCapturer = new InputEventCapturer(devices[0]);
-  var fileSender = new InputEventFileSender(filePath);
-  inputCapturer.pipe(fileSender);
+  var deviceReader = new DeviceInputEventReader(devices[0]);
+  var fileWriter = new FileInputEventWriter(filePath);
+  deviceReader.pipe(fileWriter);
 }
 
 function replay(filePath) {
@@ -102,25 +102,25 @@ function mirror() {
     return;
   }
 
-  var targetSenderMap = getTargetSenderMap(devices);
+  var deviceWriterMap = getDeviceWriterMap(devices);
   devices.forEach(function (deviceId) {
-    mirrorInputEvents(deviceId, targetSenderMap);
+    mirrorInputEvents(deviceId, deviceWriterMap);
   });
 }
 
-function mirrorInputEvents(sourceDeviceId, targetSenderMap) {
-  var inputCapturer = new InputEventCapturer(sourceDeviceId);
+function mirrorInputEvents(sourceDeviceId, deviceWriterMap) {
+  var inputReader = new DeviceInputEventReader(sourceDeviceId);
 
-  Object.keys(targetSenderMap).forEach(function (targetDeviceId) {
+  Object.keys(deviceWriterMap).forEach(function (targetDeviceId) {
     if (targetDeviceId === sourceDeviceId) return;
-    inputCapturer.pipe(targetSenderMap[targetDeviceId]);
+    inputReader.pipe(deviceWriterMap[targetDeviceId]);
   });
 }
 
-function getTargetSenderMap(deviceIds) {
-  var senderMap = {};
+function getDeviceWriterMap(deviceIds) {
+  var writerMap = {};
   deviceIds.forEach(function (deviceId) {
-    senderMap[deviceId] = new InputEventDeviceSender(deviceId);
+    writerMap[deviceId] = new DeviceInputEventWriter(deviceId);
   });
-  return senderMap;
+  return writerMap;
 }

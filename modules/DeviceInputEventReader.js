@@ -5,7 +5,7 @@ var adbBridge = require('./adbBridge');
 
 var EVENT_STRING_REGEXP = /^\/dev\/input\/event(\d): (\d{4}) (\d{4}) (\d{8})$/mg;
 
-var InputEventCapturer = function (deviceId) {
+var DeviceInputEventReader = function (deviceId) {
   var capturer = this;
 
   this.deviceId = deviceId;
@@ -30,7 +30,7 @@ var InputEventCapturer = function (deviceId) {
   });
 };
 
-InputEventCapturer.prototype.parseEventString = function (eventStr) {
+DeviceInputEventReader.prototype.parseEventString = function (eventStr) {
   function hexToDez(hex) {
     return parseInt(hex, 16);
   }
@@ -42,7 +42,7 @@ InputEventCapturer.prototype.parseEventString = function (eventStr) {
   }
 };
 
-InputEventCapturer.prototype.pipe = function (inputEventSender) {
+DeviceInputEventReader.prototype.pipe = function (inputEventWriter) {
   var lastSentEvent;
 
   this.onInputEvent = function (event) {
@@ -50,16 +50,16 @@ InputEventCapturer.prototype.pipe = function (inputEventSender) {
     lastSentEvent = event;
 
     console.log(this.deviceId, '\t>', event);
-    inputEventSender.send(event);
+    inputEventWriter.send(event);
   };
 };
 
-InputEventCapturer.prototype.onError = function (error) {
+DeviceInputEventReader.prototype.onError = function (error) {
   console.error('IntputEventCapturer error', error, this.deviceId);
 };
 
-InputEventCapturer.prototype.onInputEvent = function (event) {
+DeviceInputEventReader.prototype.onInputEvent = function (event) {
   console.log('IntputEventCapturer inputEvent', event, this.deviceId);
 };
 
-module.exports = InputEventCapturer;
+module.exports = DeviceInputEventReader;
