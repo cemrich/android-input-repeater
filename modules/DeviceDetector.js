@@ -14,6 +14,8 @@ var DeviceDetector = function () {
  *  empty when no device is connected
  */
 function getDeviceIds() {
+  // TODO: exclude devices that are offline
+
   var deviceIds = [];
   var devices = adbBridge.execSync('devices');
 

@@ -3,7 +3,8 @@
 var pjson = require('./package.json');
 var ArgumentParser = require('argparse').ArgumentParser;
 var InputEventCapturer = require('./modules/InputEventCapturer');
-var InputEventSender = require('./modules/InputEventSender');
+var InputEventDeviceSender = require('./modules/InputEventDeviceSender');
+var InputEventFileSender = require('./modules/InputEventFileSender');
 var DeviceDetector = require('./modules/DeviceDetector');
 var adbBridge = require('./modules/adbBridge');
 
@@ -75,7 +76,16 @@ switch (params.subcommand) {
 
 function record(filePath) {
   console.log('record', filePath);
-    var devices = new DeviceDetector().devices;
+
+  var devices = new DeviceDetector().devices;
+  if (devices.length !== 1) {
+    console.error("There has to be exactly one connected android device.");
+    return;
+  }
+
+  var inputCapturer = new InputEventCapturer(devices[0]);
+  var fileSender = new InputEventFileSender(filePath);
+  inputCapturer.pipe(fileSender);
 }
 
 function replay(filePath) {
@@ -89,12 +99,13 @@ function mirror() {
 
   if (devices.length < 2) {
     console.error("There has to be more than one connected android device.");
-  } else {
-    var targetSenderMap = getTargetSenderMap(devices);
-    devices.forEach(function (deviceId) {
-      mirrorInputEvents(deviceId, targetSenderMap);
-    });
+    return;
   }
+
+  var targetSenderMap = getTargetSenderMap(devices);
+  devices.forEach(function (deviceId) {
+    mirrorInputEvents(deviceId, targetSenderMap);
+  });
 }
 
 function mirrorInputEvents(sourceDeviceId, targetSenderMap) {
@@ -109,7 +120,7 @@ function mirrorInputEvents(sourceDeviceId, targetSenderMap) {
 function getTargetSenderMap(deviceIds) {
   var senderMap = {};
   deviceIds.forEach(function (deviceId) {
-    senderMap[deviceId] = new InputEventSender(deviceId);
+    senderMap[deviceId] = new InputEventDeviceSender(deviceId);
   });
   return senderMap;
 }

@@ -13,4 +13,8 @@ InputEvent.prototype.equals = function (other) {
     other.params[2] === this.params[2];
 };
 
+InputEvent.prototype.serialize = function () {
+  return [this.type].concat(this.params).join(',');
+};
+
 module.exports = InputEvent;
