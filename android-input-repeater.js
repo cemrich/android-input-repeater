@@ -13,7 +13,7 @@ var argsParser = new ArgumentParser({
   version: pjson.version,
   addHelp: true,
   description: pjson.description,
-  epilog: 'Example usage: "node android-input-repeater.js record -f myRecord.txt"'
+  epilog: 'Example usage: "node android-input-repeater.js record myRecord.txt"'
 });
 
 var subpParsers = argsParser.addSubparsers({
