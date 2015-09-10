@@ -1,3 +1,5 @@
+[![Dependency Status](https://gemnasium.com/cemrich/android-input-repeater.svg)](https://gemnasium.com/cemrich/android-input-repeater)
+
 # Android Input Repeater
 Utitlity for capturing and mirroring low level input events for android devices of the same type.
 
